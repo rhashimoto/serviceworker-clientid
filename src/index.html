@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>sw-check</title>
+  </head>
+  <body>
+    <pre id="status"></pre>
+    <script>
+      // Install Service Worker.
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+      });
+
+      (async function() {
+        // Wait for the Service Worker.
+        const sw = await navigator.serviceWorker.ready;
+
+        // Display messages from Service Worker.
+        const { port1, port2 } = new MessageChannel();
+        port1.addEventListener('message', event => {
+          const status = document.getElementById('status');
+          status.textContent += `${new Date().toLocaleTimeString()} (sw): ${event.data}\n`
+        });
+        port1.start();
+
+        // Wait until the initial message is received.
+        sw.active.postMessage(null, [port2]);
+        await new Promise(resolve => {
+          port1.addEventListener('message', resolve, { once: true });
+        });
+
+        // Fetch from the Window context.
+        fetch('from-window');
+
+        // Start Worker which will do a fetch from its context.
+        const worker = new Worker('./worker.js');
+      })();
+    </script>
+  </body>
+</html>

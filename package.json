@@ -1,0 +1,6 @@
+{
+  "name": "service-worker-clientid",
+  "devDependencies": {
+    "@web/dev-server": "^0.1.17"
+  }
+}
